@@ -1,670 +1,732 @@
-import React, {Component} from 'react';
-import '../checkout/Checkout.css';
-import Header from '../../common/header/Header';
-import GridList from '@material-ui/core/GridList';
-import {GridListTile, Typography} from '@material-ui/core';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {library} from '@fortawesome/fontawesome-svg-core';
-import {faCircle} from '@fortawesome/free-solid-svg-icons';
-import Stepper from '@material-ui/core/Stepper';
-import StepLabel from '@material-ui/core/StepLabel';
-import Step from '@material-ui/core/Step';
-import StepContent from '@material-ui/core/StepContent';
-import Button from '@material-ui/core/Button';
-import {withStyles} from '@material-ui/core/styles';
-import Divider from '@material-ui/core/Divider';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import FormControl from '@material-ui/core/FormControl';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import Paper from '@material-ui/core/Paper';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormLabel from '@material-ui/core/FormLabel';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Snackbar from '@material-ui/core/Snackbar';
-import IconButton from '@material-ui/core/IconButton';
-import CheckCircle from '@material-ui/icons/CheckCircle';
-import CloseIcon from '@material-ui/icons/Close';
-import ReactDOM from 'react-dom';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
+import React, { Component } from 'react';
+import './Checkout.css';
+import Header from '../../common/Header/Header';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
+import Container from '@material-ui/core/Container';
+import Grid from '@material-ui/core/Grid';
 
-library.add(faCircle);
+
+import Stepper from '@material-ui/core/Stepper';
+import Step from '@material-ui/core/Step';
+import StepLabel from '@material-ui/core/StepLabel';
+import StepContent from '@material-ui/core/StepContent';
+import Button from '@material-ui/core/Button';
+import Paper from '@material-ui/core/Paper';
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import Input from '@material-ui/core/Input';
+import FormHelperText from '@material-ui/core/FormHelperText';
+
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import Snackbar from '@material-ui/core/Snackbar';
+import CloseIcon from '@material-ui/icons/Close';
+import IconButton from '@material-ui/core/IconButton';
+
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
+import CheckCircle from '@material-ui/icons/CheckCircle';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormLabel from '@material-ui/core/FormLabel';
+import CardActions from '@material-ui/core/CardActions';
+import Divider from '@material-ui/core/Divider';
+
+
 
 const styles = theme => ({
     root: {
-        flexGrow: 1,
-        backgroundColor: theme.palette.background.paper
-    },
-    gridListMain: {
+        width: '90%',
+      },
+      button: {
+        marginTop: theme.spacing(1),
+        marginRight: theme.spacing(1),
+      },
+      actionsContainer: {
+        marginBottom: theme.spacing(2),
+      },
+      resetContainer: {
+        padding: theme.spacing(3),
+      }, 
+      formControl: {
+        margin: theme.spacing(1),
+        minWidth: 150,
+        maxWidth: 200,
+        width: 200
+      },
+      gridList: {
         flexWrap: 'nowrap',
         transform: 'translateZ(0)',
-        width: '600px'
-    },
-    card: {
-        maxWidth: 560,
-        margin: 10,
-    },
-    media: {
-        height: 0,
-        paddingTop: '56.25%', // 16:9
-    },
-    title: {
-        fontWeight: 'strong',
-        color: 'red',
-    },
-    actions: {
-        display: 'flex',
-    },
-    actionsContainer: {
-        marginBottom: theme.spacing.unit * 2,
-    },
-    snackbar: {
-        margin: theme.spacing.unit,
-    },
-    resetContainer: {
-        padding: theme.spacing.unit * 3,
-    },
-    formControl: {
-        margin: theme.spacing.unit,
-        minWidth: 240,
-        maxWidth: 240
-    },
-    expand: {
-        transform: 'rotate(0deg)',
-        transition: theme.transitions.create('transform', {
-            duration: theme.transitions.duration.shortest,
-        }),
-        marginLeft: 'auto',
-        [theme.breakpoints.up('sm')]: {
-            marginRight: -8,
-        },
-    },
-    expandOpen: {
-        transform: 'rotate(180deg)',
-    },
-    button: {
-        margin: '20px'
-    }
+      },
+
 });
-
-
-function getSteps() {
-    return ['Delivery', 'Payment'];
-}
-
-
-function isNum(val) {
-    return /^\d+$/.test(val);
-}
 
 class Checkout extends Component {
 
-    constructor() {
-        super();
-
+    constructor(props) {
+        super(props);
         this.state = {
-            id: "",
-            paymentId: "",
-            location: "",
-            tabValue: 0,
             activeStep: 0,
-            flat: "",
-            city: "",
-            open: false,
-            locality: "",
-            zipcode: "",
-            statename: "",
-            iconClass: "",
-            addressClass: "",
-            selectedIndex: "",
-            flatRequired: "dispNone",
+            activeTab: 0,
+            existingAddress: null,
+            newAddress: null,
+            states: [],
+            paymentModes: [],
+            newFlatNo:"",
+            newLocality:"", 
+            newCity:"",
+            newState:"", 
+            newPincode:"",
+            flatNoRequired: "dispNone", 
+            localityRequired: "dispNone", 
+            cityRequired: "dispNone", 
+            stateRequired: "dispNone",
+            pincodeRequired: "dispNone",
+            pincodeValidationMessage: "",
+            newAddressAdded: false,
+            snackBarOpen: false,
+            snackBarMessage: '',
+            selectedAddress: null,
+            selectedPaymentMode: null,
+            cartDetail: null
+
+        }
+    }
+
+    /**
+     * @description - On component mount loading default values like states,  payment modes and sp..
+     */
+    componentWillMount() {
+        // getting  cart details from details page throught router state
+        this.setState({
+            cartDetail: this.props.location.state.cartDetail
+        });
+        if(this.props.location.state.cartDetail === null || this.props.location.state.cartDetail === undefined){
+            this.props.history.push("/");
+        }
+
+        // Loading existing address of logged in user
+        this.getExistingAddress();
+        // Loading all states
+        this.getStates();
+        // Loading Payment modes
+        this.getPaymentModes();
+    }
+
+    /**
+     * @description - Loading existing address of logged in user
+     */
+    getExistingAddress = () => {
+        let dataExistingAddress = null;
+        let xhrExistingAddress = new XMLHttpRequest();
+        let that = this;
+        xhrExistingAddress.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                let data = JSON.parse(this.responseText).addresses;
+                // console.log("exAddress:", data);
+                that.setState({
+                    existingAddress : data
+                });
+            }
+        });
+
+        xhrExistingAddress.open("GET", "http://localhost:8080/api/address/customer");
+        xhrExistingAddress.setRequestHeader("Authorization", "Bearer " + sessionStorage.getItem("access-token"));
+        xhrExistingAddress.setRequestHeader("Content-Type", "application/json");
+        xhrExistingAddress.setRequestHeader("Cache-Control", "no-cache");
+        xhrExistingAddress.send(dataExistingAddress);
+    }
+
+
+    /**
+     * @description - Loading all states to fill details of new address
+     */
+    getStates = () => {
+        let dataStates = null;
+        let xhrStates = new XMLHttpRequest();
+        let that = this;
+        xhrStates.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                let data = JSON.parse(this.responseText).states;
+                // console.log("states:", data);
+                that.setState({
+                    states : data
+                });
+            }
+        });
+
+        xhrStates.open("GET", "http://localhost:8080/api/states ");
+        xhrStates.setRequestHeader("Cache-Control", "no-cache");
+        xhrStates.send(dataStates);
+    }
+
+    /**
+     * @description - Loading all payment modes from server
+     */
+    getPaymentModes = () => {
+        let dataPaymentModes = null;
+        let xhrPaymentModes = new XMLHttpRequest();
+        let that = this;
+        xhrPaymentModes.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                let data = JSON.parse(this.responseText).paymentMethods;
+                // console.log("paymentMethods:", data);
+                that.setState({
+                    paymentModes : data
+                });
+            }
+        });
+
+        xhrPaymentModes.open("GET", "http://localhost:8080/api/payment");
+        xhrPaymentModes.setRequestHeader("Cache-Control", "no-cache");
+        xhrPaymentModes.send(dataPaymentModes);
+    }
+
+    /**
+     * @description - FlatNo change handler and update component state
+     */
+    inputFlatNoChangeHandler = (e) => {
+        this.setState({ newFlatNo: e.target.value });
+    }
+    
+    /**
+     * @description - Locality change handler and update component state
+     */    
+    inputLocalityChangeHandler = (e) => {
+        this.setState({ newLocality: e.target.value });
+    }
+    
+    /**
+     * @description - City change handler and update component state
+     */
+    inputCityChangeHandler = (e) => {
+        this.setState({ newCity: e.target.value });
+    }
+
+    /**
+     * @description - State change handler and update component state
+     */
+    inputStateChangeHandler = (e) => {
+        this.setState({ newState: e.target.value });
+    }
+    
+    /**
+     * @description - Pincode change handler and update component state
+     */
+    inputPincodeChangeHandler = (e) => {
+        this.setState({ newPincode: e.target.value });
+    }
+
+    /**
+     * @description - Payment mode change handler and update component state
+     */
+    handlePaymentModeChangeHandler = (e) => {
+        this.setState({ selectedPaymentMode: e.target.value });
+    }
+
+    /**
+     * @description - Get details from user and save new address through Rest API
+     */
+    saveNewAddress = () => {
+        let pincodePattern =/^\d{6}$/;
+
+        // Validating Fields
+        this.state.newFlatNo === "" ? this.setState({ flatNoRequired: "dispBlock" }) : this.setState({ flatNoRequired: "dispNone" });
+        this.state.newLocality === "" ? this.setState({ localityRequired: "dispBlock" }) : this.setState({ localityRequired: "dispNone" });
+        this.state.newCity === "" ? this.setState({ cityRequired: "dispBlock" }) : this.setState({ cityRequired: "dispNone" });
+        this.state.newState === "" ? this.setState({ stateRequired: "dispBlock" }) : this.setState({ stateRequired: "dispNone" });
+        if(this.state.newPincode === "") {
+            this.setState({ pincodeRequired: "dispBlock" });
+            this.setState({ pincodeValidationMessage: "Required" });            
+        } else if(!pincodePattern.test(this.state.newPincode)){
+            this.setState({ pincodeRequired: "dispBlock" });
+            this.setState({ pincodeValidationMessage: "Pincode must contain only numbers and must be 6 digits long" });
+        } else {
+            this.setState({ pincodeRequired: "dispNone" });
+            this.setState({ pincodeValidationMessage: "" });
+        }
+
+        // Return if any fields not filled or not in right pattern
+        if( this.state.newFlatNo === "" || 
+            this.state.newLocality === "" ||
+            this.state.newCity === "" ||
+            this.state.newState === "" ||
+            this.state.newPincode === "" || 
+            !pincodePattern.test(this.state.newPincode)){
+            return;
+        }
+
+        // Filling temp address object with values to push to server
+        let dataNewAddress = JSON.stringify({
+            "city": this.state.newCity,
+            "flat_building_name": this.state.newFlatNo,
+            "locality": this.state.newLocality,
+            "pincode": this.state.newPincode,
+            "state_uuid": this.state.newState
+        });
+
+        // Rest call to add address
+        let xhrNewAddress = new XMLHttpRequest();
+        let that = this;
+        xhrNewAddress.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                that.setState({
+                    newAddressAdded: true
+                });
+                // Resettemp address object
+                that.resetNewAddress();
+                // On success - get all existing address
+                that.getExistingAddress();
+                // update tab component state
+                that.setState({
+                    activeTab: 0
+                });
+                // Success message to user
+                that.snackBarHandler("New address added!!");
+            }
+        });
+
+        xhrNewAddress.open("POST", "http://localhost:8080/api/address");
+        xhrNewAddress.setRequestHeader("Authorization", "Bearer " + sessionStorage.getItem("access-token"));
+        xhrNewAddress.setRequestHeader("Content-Type", "application/json");
+        xhrNewAddress.setRequestHeader("Cache-Control", "no-cache");
+        xhrNewAddress.send(dataNewAddress);
+
+    }
+
+    /**
+     * @description - update Selected address in component state
+     */
+    selectThisAddress = (_address) => {
+        this.setState({
+            selectedAddress: _address
+        })
+    }
+
+    /**
+     * @description - Method to reset address related state after success
+     */
+    resetNewAddress = () => {
+        this.setState({
+            newCity: '',
+            newFlatNo: '',
+            newLocality: '',
+            newPincode: '',
+            newState: '',
+            flatNoRequired: "dispNone",
+            localityRequired: "dispNone",
             cityRequired: "dispNone",
             stateRequired: "dispNone",
-            zipcodeRequired: "dispNone",
-            localityRequired: "dispNone",
-            incorrectZipcode: "dispNone",
-            orderPlaced: "dispNone",
-            incorrectDetails: "false",
-            address: "",
-            categories: [],
-            totalCartItemsValue: "",
-            orderNotificationMessage: "",
-            states: [],
-            stateId: '',
-            selectedAddress: [],
-            cartItems: [],
-            paymentModes: [],
-            addresses: []
-        }
+            pincodeRequired: "dispNone",
+            pincodeValidationMessage: ""
+        });
     }
 
-    componentWillMount() {
-
-        if (sessionStorage.getItem("access-token") == null) {
-            this.props.history.push('/');
-        }
-        else {
-            let resourcePath = "/address/user";
-            let resourcePath1 = "/payment/";
-            let resourcePath2 = "/states/";
-            let data = null;
-            let xhr = new XMLHttpRequest();
-            let xhr1 = new XMLHttpRequest();
-            let xhr2 = new XMLHttpRequest();
-            let that = this;
-            console.log("baseurl : " + this.props.baseUrl + resourcePath);
-            xhr.addEventListener("readystatechange", function () {
-                if (this.readyState === 4 && this.status === 200) {
-                    that.setState({
-                        addresses: JSON.parse(this.responseText)
-                    });
-                }
-            });
-
-            xhr.open("GET", this.props.baseUrl + resourcePath);
-            xhr.setRequestHeader("accessToken", sessionStorage.getItem("access-token"));
-            xhr.send(data);
-
-            xhr1.addEventListener("readystatechange", function () {
-                if (this.readyState === 4 && this.status === 200) {
-                    that.setState({
-                        paymentModes: JSON.parse(this.responseText)
-                    });
-                }
-            });
-
-            xhr1.open("GET", this.props.baseUrl + resourcePath1);
-            xhr1.setRequestHeader("accessToken", sessionStorage.getItem("access-token"));
-            xhr1.send(data);
-
-            xhr2.addEventListener("readystatechange", function () {
-                if (this.readyState === 4 && this.status === 200) {
-                    that.setState({
-                        states: JSON.parse(this.responseText)
-                    });
-                }
-            });
-
-            xhr2.open("GET", this.props.baseUrl + resourcePath2);
-            xhr2.send(data);
-        }
-
-    }
-
-    tabChangeHandler = (event, tabValue) => {
-        this.setState({tabValue});
-    }
-
-    locationChangeHandler = event => {
-        this.setState({stateId: event.target.value, location: event.target.text});
-    }
-
-
+    /**
+     *
+     *@description - Stepper next button handler
+     */
     handleNext = () => {
-        if (this.state.tabValue === 1) {
+        if(this.state.selectedAddress === null){
+            this.snackBarHandler("Please Select Delivery address.");
+            return;
+        }
+        if(this.state.activeStep === 1 && this.state.selectedPaymentMode === null){
+            this.snackBarHandler("Please Select Payment mode.");
+            return;
+        }
+         if(this.state.activeTab !== 1){
+            this.setState({
+                activeStep: this.state.activeStep + 1
+            })
+        }
+    }
 
-            this.state.flat === "" ? this.setState({
-                incorrectDetails: "true",
-                flatRequired: "dispBlock"
-            }) : this.setState({incorrectDetails: "false", flatRequired: "dispNone"});
-            this.state.city === "" ? this.setState({
-                incorrectDetails: "true",
-                cityRequired: "dispBlock"
-            }) : this.setState({incorrectDetails: "false", cityRequired: "dispNone"});
-            this.state.locality === "" ? this.setState({
-                incorrectDetails: "true",
-                localityRequired: "dispBlock"
-            }) : this.setState({incorrectDetails: "false", localityRequired: "dispNone"});
-            this.state.zipcode === "" ? this.setState({
-                incorrectDetails: "true",
-                zipcodeRequired: "dispBlock"
-            }) : this.setState({incorrectDetails: "false", zipcodeRequired: "dispNone"});
-            if (this.state.zipcode !== "") {
-                if (this.state.zipcode.length === 6 && isNum(this.state.zipcode)) {
-                    this.setState({incorrectDetails: "false", incorrectZipcode: "dispNone"})
-                }
-                else {
-                    this.setState({incorrectDetails: "true", incorrectZipcode: "dispBlock"})
-                }
+    /**
+     * @description - place order method 
+     */
+    placeOrder = () => {
+
+        let itemList = [];
+            // Checking  cartdetail and selected address available  or not , before place order and alert user
+        if(this.state.cartDetail === null ||
+            this.state.selectedAddress === null ||
+            this.state.selectedPaymentMode === null){
+                this.snackBarHandler("Unable to place your order! Please try again!");
+                return;
             }
-            if (this.state.incorrectDetails === "false") {
-                let  savedAddress = {
-                    "id": "",
-                    "flatBuilNo": this.state.flatBuilNo,
-                    "locality": this.state.locality,
-                    "city": this.state.city,
-                    "zipcode": this.state.zipcode,
-                    "state": {
-                        "id": this.state.stateId,
-                        "stateName": this.state.location
-                    }
-                }
-                this.setState({
-                    selectedAddress: savedAddress,
-                });
+
+        // setting items and quantities from cartdetails from details page
+        this.state.cartDetail.itemList.forEach(_itemList => {
+            let tempObj= {
+                "item_id": _itemList.item.id,
+                "price": _itemList.item.price,
+                "quantity": _itemList.quantity
             }
-        }
+            itemList.push(tempObj);
+        });
 
-        if (this.state.activeStep === 1 && this.state.paymentId !== "") {
-            this.setState(state => ({
-                orderPlaced: "dispBlock",
-                activeStep: state.activeStep + 1
-            }));
-        }
+        // Temp object to fill all values  
+        let dataOrder = JSON.stringify({
+            "address_id": this.state.selectedAddress.id,
+            "bill": this.state.cartDetail.totalPrice,
+            "coupon_id": "",
+            "discount": 0,
+            "item_quantities": itemList,
+            "payment_id": this.state.selectedPaymentMode,
+            "restaurant_id": this.state.cartDetail.restaurant.id
+          });
 
-        if (this.state.activeStep !== 1 && this.state.incorrectDetails === "false" && this.state.selectedAddress.length !== 0) {
-            this.setState(state => ({
-                activeStep: state.activeStep + 1,
-            }));
-        }
+        // Rest api to place order  
+        let xhrOrder = new XMLHttpRequest();
+        let that = this;
+        xhrOrder.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                let data = JSON.parse(this.responseText);
+                if(this.status === 201){
+                    that.snackBarHandler("Order placed successfully! Your order ID is "+data.id);
+                   that.setState({
+                       selectedAddress: null,
+                       selectedPaymentMode: null
+                   });
+                //    that.props.history.push('/');
+                }else{
+                    that.snackBarHandler("Unable to place your order! Please try again!");
+                }
+                
+            }
+        });
 
-    };
-
+        xhrOrder.open("POST", "http://localhost:8080/api/order");
+        xhrOrder.setRequestHeader("Authorization", "Bearer " + sessionStorage.getItem("access-token"));
+        xhrOrder.setRequestHeader("Content-Type", "application/json");
+        xhrOrder.setRequestHeader("Cache-Control", "no-cache");
+        xhrOrder.send(dataOrder);
+        
+    }
+    
+    /**
+     *
+     *@description - stepper back button handler
+     */
     handleBack = () => {
-        this.setState(state => ({
-            activeStep: state.activeStep - 1,
-        }));
-    };
-
+        if(this.state.activeStep === 1){
+            this.setState({
+                activeStep: 0
+            })
+        }
+    }
+    
+    /**
+     * @description - reset stepper settings reset
+     */
     handleReset = () => {
         this.setState({
-            activeStep: 0,
-        });
-    };
+            activeStep: 0
+        })
+    }
 
-    paymentHandleChange = event => {
-        console.log("payment handler.............")
-        this.setState({paymentId: event.target.value});
-    };
-
-    inputFlatChangeHandler = (e) => {
+    /**
+     * @description - tab value change handler
+     */
+    handleChange = (event, newValue) => {
         this.setState({
-            flatBuilNo: e.target.value,
-        });
+            activeTab: newValue
+        })
     }
 
-    inputCityChangeHandler = (e) => {
-        this.setState({city: e.target.value});
-    }
-
-    inputLocalityChangeHandler = (e) => {
-        this.setState({locality: e.target.value});
-    }
-
-    inputZipcodeChangeHandler = (e) => {
-        this.setState({zipcode: e.target.value});
-    }
-
-    inputStateChangeHandler = (e) => {
-        this.setState({stateId: e.target.value});
-    }
-
-    changeHandler = () => {
-        ReactDOM.render(<Checkout/>, document.getElementById('root'));
-    }
-
-    iconClickHandler = (address, index) => {
-        this.state.addresses.map(obj => (
-            obj.id === address.id ?
-                this.setState({
-                    selectedAddress: address,
-                    selectedIndex: index,
-                    addressClass: "selectionGrid",
-                    iconClass: "green"
-                })
-                :
-                console.log("dint match " + obj.id)
-        ));
-    }
-
-    snackBarCloseHandler = () => {
+    /**
+     * @description - Reset  tab settings
+     */
+    handleTabReset = () => {
         this.setState({
-            open: false
-        });
+            activeTab: 0
+        })
     }
 
-    confirmOrderHandler = (name, value) => {
-        let resourcePath3 = "/order";
-        let xhr = new XMLHttpRequest();
-        let that = this;
-        let address = this.state.selectedAddress;
-        let parameters;
-        let itemQuantities;
-
-        if (this.props.location.cartItems === undefined) {
-            that.setState({
-                open: true,
-                orderNotificationMessage: "Unable to place your order! Please try again!"
-            });
-            return;
-        } else {
-            this.props.location.cartItems.map(item => {
-                this.state.cartItems.push({
-                    "itemId": item.id,
-                    "quantity": item.quantity
-                });
-            });
-
-            itemQuantities = JSON.stringify(this.state.cartItems);
-        }
-        if (address.length === 0) {
-            that.setState({
-                open: true,
-                orderNotificationMessage: "Unable to place your order! Please try again!"
-            });
-            return;
-        }
-        if (address.id !== "") {
-            parameters = "addressId=" + address.id +
-                "&paymentId=" + Number(this.state.paymentId) +
-                "&bill=" + this.props.location.totalCartValue;
-
-        } else {
-            parameters = "flatBuilNo=" + address.flatBuilNo +
-                "&locality=" + address.locality +
-                "&city=" + address.city +
-                "&zipcode=" + address.zipcode +
-                "&stateId=" + address.state.id +
-                "&paymentId=" + Number(this.state.paymentId) +
-                "&bill=" + this.props.location.totalCartValue;
-
-        }
-
-        console.log("order placed params : " + parameters);
-        console.log("order placed body : " + itemQuantities);
-
-        xhr.addEventListener("readystatechange", function () {
-            if (this.readyState === 4 && this.status === 200) {
-                that.setState({
-                    open: true,
-                    orderNotificationMessage: "Your order placed successfully! Your order ID is " + this.responseText
-                });
-            }
-            else {
-                that.setState({
-                    open: true,
-                    orderNotificationMessage: "Unable to place your order! Please try again!"
-                });
-            }
-        });
-
-        xhr.open("POST", this.props.baseUrl + resourcePath3 + "?" + parameters);
-        xhr.setRequestHeader("Content-Type", "application/json")
-        xhr.setRequestHeader("accessToken", sessionStorage.getItem("access-token"));
-        xhr.send(itemQuantities);
-
+    /**
+     * @description - snackbar common method to handle all messages
+     */
+    snackBarHandler = (message) => {
+        // close all prev snackbar
+        this.setState({ snackBarOpen: false});
+        // Setting messages to snackbar
+        this.setState({ snackBarMessage: message});
+        // Showing new snackbar with message
+        this.setState({ snackBarOpen: true});
     }
-
+    
+    /**
+     * @description - default component render method
+     */
     render() {
-        const {classes} = this.props;
-        const steps = getSteps();
-        const {activeStep} = this.state;
-        const {cartItems, totalCartValue} = this.props.location;
+        const { classes } = this.props;
+        let existAddress = this.state.existingAddress || [];
         return (
-            <div className="checkout">
-                <Header {...this.props} isHomePage={false}/>
-                <div className="main-body-container">
-                    <div>
-                        <Stepper activeStep={activeStep} orientation="vertical">
-                            {steps.map((label, index) => {
-                                return (
-                                    <Step key={label}>
-                                        <StepLabel>{label}</StepLabel>
-                                        <StepContent>
-                                            {index === 0 &&
-                                            <div>
-                                                <Tabs className="addTabs" value={this.state.tabValue}
-                                                      onChange={this.tabChangeHandler}>
-                                                    <Tab label="EXISTING ADDRESS"/>
-                                                    <Tab label="NEW ADDRESS"/>
+            <div>
+                <Header baseUrl={this.props.baseUrl} />
+                <Container fixed style={{ 'margin':16}}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={9}>
+                            <Stepper activeStep={this.state.activeStep} orientation="vertical">
+                                <Step>
+                                    <StepLabel>Delivery</StepLabel>
+                                    <StepContent>
+                                        <div> 
+                                            <AppBar variant="fullWidth" position="static">
+                                                <Tabs value={this.state.activeTab} onChange={this.handleChange.bind(this)} >
+                                                <Tab label="Existing Address" />
+                                                <Tab label="New Address" />
                                                 </Tabs>
-
-                                                {this.state.tabValue === 0 &&
-                                                (this.state.addresses.length !== 0 ?
-                                                        <GridList cellHeight={"auto"} className={classes.gridListMain}
-                                                                  cols={3}>
-                                                            {this.state.addresses.map((address, i) => (
-                                                                <GridListTile key={i} style={{padding: '20px'}}>
-                                                                    <div id={i} key={i}
-                                                                         className={this.state.selectedIndex === i ? 'selectionGrid' : 'grid'}
-                                                                         style={{padding: '10px'}}>
-                                                                        <Typography style={{
-                                                                            fontSize: '20px',
-                                                                            marginRight: '20px',
-                                                                            marginBottom: '5px'
-                                                                        }}>{address.flatBuilNo}</Typography>
-                                                                        <Typography style={{
-                                                                            fontSize: '20px',
-                                                                            marginRight: '20px',
-                                                                            marginBottom: '10px'
-                                                                        }}>{address.locality}</Typography>
-                                                                        <Typography style={{
-                                                                            fontSize: '20px',
-                                                                            marginRight: '20px',
-                                                                            marginBottom: '10px'
-                                                                        }}>{address.city}</Typography>
-                                                                        <Typography style={{
-                                                                            fontSize: '20px',
-                                                                            marginRight: '20px',
-                                                                            marginBottom: '10px'
-                                                                        }}>{address.state.stateName}</Typography>
-                                                                        <Typography style={{
-                                                                            fontSize: '20px',
-                                                                            marginRight: '20px',
-                                                                            marginBottom: '10px'
-                                                                        }}>{address.zipcode}</Typography>
-                                                                        <IconButton id={i} key={i}
-                                                                                    style={{marginLeft: '60%'}}
-                                                                                    onClick={() => this.iconClickHandler(address, i)}>
-                                                                            <CheckCircle
-                                                                                className={this.state.selectedIndex === i ? 'green' : 'grid'}/>
-                                                                        </IconButton>
-                                                                    </div>
-                                                                </GridListTile>
+                                            </AppBar>
+                                            {this.state.activeTab === 0 && (
+                                                <div>
+                                                    {existAddress.length === 0 ? (
+                                                        <Typography variant="body2"  gutterBottom>
+                                                            There are no saved addresses! You can save an address using the 'New Address' tab or using your ‘Profile’ menu option
+                                                        </Typography>
+                                                            
+                                                    ) : (
+                                                        <GridList className={classes.gridList} cols={3}  spacing={4}>
+                                                            {existAddress.map((address,index) => (
+                                                            <GridListTile style={{margin:10, borderRadius: 4}}  key={address.id} className={ this.state.selectedAddress && (this.state.selectedAddress.id === address.id) ? 'hightLightAddress' : 'noHighLight'}>
+                                                                <Typography variant="body2"  gutterBottom>
+                                                                    {address.flat_building_name}
+                                                                </Typography>
+                                                                <Typography variant="body2"  gutterBottom>
+                                                                    {address.locality}
+                                                                </Typography>
+                                                                <Typography variant="body2"  gutterBottom>
+                                                                    {address.city}
+                                                                </Typography>
+                                                                <Typography variant="body2"  gutterBottom>
+                                                                    {address.state.state_name}
+                                                                </Typography>
+                                                                <Typography variant="body2"  gutterBottom>
+                                                                    {address.pincode}
+                                                                </Typography>
+                                                                <div className="rightIcon">
+                                                                    <IconButton disableRipple={true} onClick={this.selectThisAddress.bind(this,address)}>
+                                                                        <CheckCircle className={ this.state.selectedAddress && (this.state.selectedAddress.id === address.id) ? 'greenBtn' : 'greyBtn'}/>
+                                                                    </IconButton>
+                                                                </div>
+                                                            </GridListTile>
                                                             ))}
                                                         </GridList>
-                                                        :
-                                                        <div style={{marginBottom: '100px'}}>
-                                                            <Typography style={{color: 'grey', fontSize: '18px'}}>There
-                                                                are no saved addresses! You can save an address using
-                                                                your ‘Profile’ menu option.</Typography>
-                                                        </div>
-                                                )}
-                                                {this.state.tabValue === 1 &&
-                                                <div className="dispFlex">
-                                                    <FormControl required>
-                                                        <InputLabel htmlFor="flat">Flat/Building No.</InputLabel>
-                                                        <Input id="flat" type="text" flat={this.state.flat}
-                                                               defaultValue={this.state.flat}
-                                                               onChange={this.inputFlatChangeHandler}/>
-                                                        <FormHelperText className={this.state.flatRequired}>
-                                                            <span className="red">required</span>
-                                                        </FormHelperText>
-                                                    </FormControl>
-                                                    <br/><br/>
-                                                    <FormControl required>
-                                                        <InputLabel htmlFor="locality">Locality</InputLabel>
-                                                        <Input id="locality" locality={this.state.locality}
-                                                               defaultValue={this.state.locality}
-                                                               onChange={this.inputLocalityChangeHandler}/>
-                                                        <FormHelperText className={this.state.localityRequired}>
-                                                            <span className="red">required</span>
-                                                        </FormHelperText>
-                                                    </FormControl>
-                                                    <br/><br/>
-                                                    <FormControl required>
-                                                        <InputLabel htmlFor="city">City</InputLabel>
-                                                        <Input id="city" city={this.state.city}
-                                                               defaultValue={this.state.city}
-                                                               onChange={this.inputCityChangeHandler}/>
-                                                        <FormHelperText className={this.state.cityRequired}>
-                                                            <span className="red">required</span>
-                                                        </FormHelperText>
-                                                    </FormControl>
-                                                    <br/><br/>
-                                                    <FormControl required>
-                                                        <InputLabel htmlFor="location">State</InputLabel>
-                                                        <Select
-                                                            value={this.state.stateId}
-                                                            onChange={this.inputStateChangeHandler}
-                                                        >
-                                                            {this.state.states.map(loc => (
-                                                                <MenuItem key={"loc" + loc.id} value={loc.id}>
-                                                                    {loc.stateName}
-                                                                </MenuItem>
-                                                            ))}
-                                                        </Select>
-                                                        <FormHelperText className={this.state.stateRequired}>
-                                                            <span className="red">required</span>
-                                                        </FormHelperText>
-                                                    </FormControl>
-                                                    <br/><br/>
-                                                    <FormControl required>
-                                                        <InputLabel htmlFor="zipcode">Zipcode</InputLabel>
-                                                        <Input id="zipcode" zipcode={this.state.zipcode}
-                                                               defaultValue={this.state.zipcode}
-                                                               onChange={this.inputZipcodeChangeHandler}/>
-                                                        <FormHelperText className={this.state.zipcodeRequired}>
-                                                            <span className="red">required</span>
-                                                        </FormHelperText>
-                                                        <FormHelperText className={this.state.incorrectZipcode}>
-                                                            <span className="red">Zipcode must contain only numbers and must be 6 digits long</span>
-                                                        </FormHelperText>
-                                                    </FormControl>
-                                                    <br/><br/>
+                                                    )}
                                                 </div>
-                                                }
+                                            )}
+                                            {this.state.activeTab === 1 && (
+                                                <div> 
+                                                <FormControl required className={classes.formControl}>
+                                                    <InputLabel htmlFor="flatNo">Flat / Building No</InputLabel>
+                                                    <Input id="flatNo" type="text" newflatno={this.state.newFlatNo} onChange={this.inputFlatNoChangeHandler} />
+                                                    <FormHelperText className={this.state.flatNoRequired}>
+                                                        <span className="red">required</span>
+                                                    </FormHelperText>
+                                                </FormControl>
+                                                <br />
+                                                <FormControl required className={classes.formControl}>
+                                                    <InputLabel htmlFor="locality">Locality</InputLabel>
+                                                    <Input id="locality" type="text" newlocality={this.state.newLocality} onChange={this.inputLocalityChangeHandler} />
+                                                    <FormHelperText className={this.state.localityRequired}>
+                                                        <span className="red">required</span>
+                                                    </FormHelperText> 
+                                                </FormControl> 
+                                                <br />
+                                                <FormControl required className={classes.formControl}>
+                                                    <InputLabel htmlFor="city">City</InputLabel>
+                                                    <Input id="city" type="text" newcity={this.state.newCity} onChange={this.inputCityChangeHandler} />
+                                                    <FormHelperText className={this.state.cityRequired}>
+                                                        <span className="red">required</span>
+                                                    </FormHelperText> 
+                                                </FormControl>
+                                                <br />
+                                                <FormControl required className={classes.formControl}>
+                                                    <InputLabel htmlFor="state">State</InputLabel>
+                                                    <Select value={this.state.newState}  onChange={this.inputStateChangeHandler}  input={<Input name="state" id="state" />} className="stateSelect">
+                                                    {(this.state.states || []).map((state, index) => (
+                                                            <MenuItem key={state.id} value={state.id}>{state.state_name}</MenuItem>
+                                                    ))}
+                                                    </Select>
+                                                    <FormHelperText className={this.state.stateRequired}>
+                                                        <span className="red">required</span>
+                                                    </FormHelperText> 
+                                                </FormControl>
+                                                <br />
+                                                <FormControl required className={classes.formControl} >
+                                                    <InputLabel htmlFor="pincode">Pincode</InputLabel>
+                                                    <Input id="pincode" type="text" newcity={this.state.newPincode} onChange={this.inputPincodeChangeHandler} />
+                                                    <FormHelperText className={this.state.pincodeRequired}>
+                                                        <span className="red">{this.state.pincodeValidationMessage}</span>
+                                                    </FormHelperText> 
+                                                </FormControl> 
+                                                <br />
+                                                <Button variant="contained" color="secondary" style={{marginBottom:20, marginTop:20}}
+                                                    onClick={this.saveNewAddress.bind(this)}
+                                                >
+                                                    SAVE ADDRESS
+                                                </Button>
                                             </div>
-                                            }
-                                            {
-                                                index === 1 &&
-                                                <div>
-                                                    <FormControl component="fieldset" className={classes.formControl}>
-                                                        <FormLabel component="legend">Select Mode of Payment</FormLabel>
-                                                        <RadioGroup
-                                                            aria-label="Gender"
-                                                            name="gender1"
-                                                            className={classes.group}
-                                                            value={this.state.paymentId}
-                                                            onChange={this.paymentHandleChange}
-                                                        >
-                                                            {this.state.paymentModes.map((payment) => {
-                                                                return (
-                                                                    <FormControlLabel key={payment.id}
-                                                                                      value={""+ payment.id}
-                                                                                      defaultValue={payment.paymentName}
-                                                                                      control={<Radio/>}
-                                                                                      label={payment.paymentName}/>
-                                                                )
-                                                            })}
-                                                        </RadioGroup>
-                                                    </FormControl>
-                                                </div>
-                                            }
-                                            <div className={classes.actionsContainer}>
-                                                <div>
-                                                    <Button
-                                                        disabled={activeStep === 0}
-                                                        onClick={this.handleBack}
-                                                        className={classes.button}
-                                                    >
-                                                        Back
-                                                    </Button>
-                                                    <Button
-                                                        variant="contained"
-                                                        color="primary"
-                                                        onClick={this.handleNext}
-                                                        className={classes.button}
-                                                    >
-                                                        {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                                                    </Button>
-                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        <div className={classes.actionsContainer}>
+                                            <div>
+                                                <Button
+                                                    disabled={this.state.activeStep === 0}
+                                                    onClick={this.handleBack.bind(this)}
+                                                    className={classes.button}
+                                                >
+                                                    Back
+                                                </Button>
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    onClick={this.handleNext.bind(this)}
+                                                    className={classes.button}
+                                                >Next
+                                                </Button>
                                             </div>
-                                        </StepContent>
-                                    </Step>
-                                );
-                            })}
-                        </Stepper>
+                                        </div>
+                                    </StepContent>
+                                </Step>
+                                <Step>
+                                    <StepLabel>Payment</StepLabel>
+                                    <StepContent>
+                                        
+                                        <FormControl component="fieldset" className={classes.formControl}>
+                                            <FormLabel component="legend" className={this.state.selectedPaymentMode ? 'hightLightPayment': ''}>Select Mode of Payment</FormLabel>
+                                            <RadioGroup
+                                            aria-label="PaymentMode"
+                                            name="paymentMode"
+                                            className={classes.group}
+                                            onChange={this.handlePaymentModeChangeHandler}
+                                            >
+                                            {(this.state.paymentModes || []).map((pModes,index) => (
+                                                <FormControlLabel key={pModes.id} value={pModes.id} control={<Radio />} label={pModes.payment_name} 
+                                                checked={this.state.selectedPaymentMode === pModes.id} className="radioButtons"/>
+                                            ))}
+                                            </RadioGroup>
+                                        </FormControl>
 
-                        <div className={this.state.orderPlaced}>
-                            {activeStep === steps.length && (
+                                        <div className={classes.actionsContainer}>
+                                            <div>
+                                                <Button
+                                                    disabled={this.state.activeStep === 0}
+                                                    onClick={this.handleBack.bind(this)}
+                                                    className={classes.button}
+                                                >
+                                                    Back
+                                                </Button>
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    onClick={this.handleNext.bind(this)}
+                                                    className={classes.button}
+                                                >Finish
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </StepContent>
+                                </Step>
+                            </Stepper>
+                            {this.state.activeStep > 1 && (
                                 <Paper square elevation={0} className={classes.resetContainer}>
-                                    <Typography>View the summary and place your order now!</Typography>
-                                    <Button onClick={this.handleReset} className={classes.button}>CHANGE</Button>
+                                <Typography>View the summary and place your order now!</Typography>
+                                <Button onClick={this.handleReset.bind(this)} className={classes.button}>
+                                    CHANGE
+                                </Button>
                                 </Paper>
                             )}
-                        </div>
-                    </div>
+                        </Grid>
+                        <Grid item xs={12} sm={3}>
+                            <Card className={classes.card}>
+                                <CardContent>
+                                     <Typography className={classes.title} display="inline" variant="h6">Summary </Typography>
+                                     <Typography className={classes.title} display="block" variant="body" style={{marginTop:8, marginBottom:8}}>{this.state.cartDetail.restaurant.restaurant_name} </Typography>
+                                    {(this.state.cartDetail.itemList || []).map((cartItem, index) => (
+                                            <Grid item xs container key={cartItem.item.id} >
+                                                <Grid container spacing={2} direction="row" justify="space-between" alignItems="center">
+                                                    <Grid item >
+                                                        <Typography variant="caption"  gutterBottom className="capitalize">
+                                                            <i className={cartItem.item.item_type !== 'VEG' ? 'fa fa-stop-circle-o redColor' : ' fa fa-stop-circle-o greenColor'} />
+                                                            <span style={{marginLeft:8}} >{cartItem.item.item_name}</span>
+                                                        </Typography>
+                                                    </Grid>                                                            
+                                                    <Grid item >
+                                                        <Typography variant="caption"  gutterBottom>
+                                                            <Typography variant="caption" style={{marginRight:20}}>{cartItem.quantity}</Typography> 
+                                                            <i className="fa fa-inr"></i>
+                                                            <span>{cartItem.totalItemPrice}</span>                                                                    
+                                                        </Typography>
+                                                    </Grid>                                                            
+                                                </Grid>
+                                            </Grid>
+                                        ))}
+                                        <Divider style={{ marginTop:8, marginBottom:8}} />
+                                        <Grid item xs container justify="space-between">
+                                            <Grid item >
+                                                <Typography variant="caption"  gutterBottom className="bold">
+                                                    Total Amount                                                                  
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item >
+                                                <Typography variant="caption"  gutterBottom className="bold">
+                                                    <i className="fa fa-inr"></i>
+                                                    {this.state.cartDetail.totalPrice}                                                                  
+                                                </Typography>
+                                            </Grid>
+                                        </Grid>
+                                </CardContent>
+                                
+                                <CardActions>
+                                    <Button variant="contained" color="primary" style={{width:'100%'}} onClick={this.placeOrder.bind(this)}>
+                                        PLACE ORDER
+                                    </Button>
+                                </CardActions>
+                            </Card>
+                        </Grid>
+                    </Grid>     
 
-                    <div className="orderSummary">
-                        <Card style={{height: '100%'}}>
-                            <CardContent>
-                                <Typography style={{marginLeft: '40px', fontWeight: 'bold', marginBottom: '30px'}}
-                                            gutterBottom variant="h5" component="h2">
-                                    Summary
-                                </Typography>
-                                {cartItems !== undefined && cartItems.map(item => (
-                                    <div className="order-body-container" key={"item" + item.id}>
-                                        <div className="div-container div-items">{item.type === 'Veg' &&
-                                        <FontAwesomeIcon icon="circle" className="veg-item-color"/>}
-                                            {item.type === 'Non-Veg' &&
-                                            <FontAwesomeIcon icon="circle" className="non-veg-color"/>} {item.itemName}
-                                        </div>
-                                        <div className="div-container"> {item.quantity}</div>
-                                        <div className="div-container"><FontAwesomeIcon icon="rupee-sign"/> {item.price}
-                                        </div>
-                                    </div>
-                                ))}
-                                <Divider/>
-                                <div className="body-container">
-                                    <span style={{fontWeight: 'bold'}}
-                                          className="div-container div-items">Net Amount </span>
-                                    <span className="rupee-container"><FontAwesomeIcon
-                                        icon="rupee-sign"/> {totalCartValue}</span>
-                                </div>
-                                <br/>
-                                <Button className="button-container" style={{marginLeft: '55px'}} variant="contained"
-                                        onClick={this.confirmOrderHandler} color="primary">
-                                    Place Order
-                                </Button>
-                                <Snackbar
-                                    anchorOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'left',
-                                    }}
-                                    open={this.state.open}
-                                    autoHideDuration={6000}
-                                    onClose={this.handleClose}
-                                    ContentProps={{
-                                        'aria-describedby': 'message-id',
-                                    }}
-                                    message={<span id="message-id">{this.state.orderNotificationMessage}</span>}
-                                    action={[
-                                        <IconButton
-                                            key="close"
-                                            aria-label="Close"
-                                            color="inherit"
-                                            className={classes.close}
-                                            onClick={this.snackBarCloseHandler}
+                     <Snackbar 
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'left',
+                                }} 
+                                open={this.state.snackBarOpen} 
+                                autoHideDuration={6000}  
+                                onClose={() => this.setState({ snackBarOpen: false })}
+                                ContentProps={{
+                                    'aria-describedby': 'message-id',
+                                }}
+                                message={<span id="message-id">{this.state.snackBarMessage}</span>}
+                                action={[
+                                    <IconButton
+                                        key="close"
+                                        aria-label="Close"
+                                        color="inherit"
+                                        className={classes.close}
+                                        onClick={() => this.setState({ snackBarOpen: false })}
                                         >
-                                            <CloseIcon/>
-                                        </IconButton>,
-                                    ]}
-                                />
-                            </CardContent>
-                        </Card>
-                    </div>
+                                        <CloseIcon />
+                                    </IconButton>
+                                ]}
+                            />
 
-                </div>
+                </Container>
             </div>
         )
     }
+
 }
 
 export default withStyles(styles)(Checkout);

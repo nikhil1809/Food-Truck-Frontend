@@ -1,94 +1,28 @@
-/**css for checkout component**//
-.addTabs {
-    background-color: #3f51b5;
-    color: white;
+#menu-state .MuiMenu-list {
+    outline: none;
+    height: 200px;
+    overflow: auto;
 }
 
-.text {
-    font-size: 20px;
-}
-
-.dispFlex {
-    width: 800px;
-}
-
-.formControl {
-    display:flex;
-}
-
-.order-body-container {
+.rightIcon{
     display: flex;
-    justify-content: flex-start;
+    justify-content: flex-end;
+    padding-right: 20px;
 }
 
-.veg-item-color{
-    color: green;
+.greenBtn{
+    color: #328A59;
 }
 
-.non-veg-color{
-    color: #9A2B13;
+.hightLightAddress{
+    border: #E24574 1px solid;
+    box-shadow: 1px 1px 1px #E24574;
 }
 
-.main-body-container {
-    display: flex;
-    justify-content: space-between;
-    height: 100%;
+.hightLightPayment{
+    color: blue;
 }
 
-.body-container {
-    display: flex;
-    justify-content: flex-start;
-}
-
-.div-container {
-    margin: 8px;
-    margin-left: 10%;
-}
-
-.price-container {
-    min-width: 50px;
-}
-
-.rupee-container {
-    margin: 8px;
-    margin-left: 24%;
-}
-
-.div-items {
-    min-width: 180px;
-}
-
-
-.dispNone {
-    display: none;
-}
-
-.dispBlock {
-    display: block;
-    border-radius: 4px;
-    background-color: #c0c0c0;
-}
-
-.orderSummary {
-    margin: 30px 60px auto auto;
-    width: 400px;
-}
-
-.selectionGrid {
-    border: 3px solid red;
-    box-shadow: 8px 8px red;
-    border-radius: 5px;
-}
-
-.green {
-    color: green;
-}
-
-.grid {
-    
-}
-
-.button-container {
-    margin-left: 70px;
-    width: 350px;
+.radioButtons .MuiTypography-body1{
+    font-size: 14px !important;
 }
