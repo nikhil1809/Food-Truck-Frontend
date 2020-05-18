@@ -1,167 +1,134 @@
-import React, {Component} from 'react';
-import '../home/Home.css';
-import PropTypes from 'prop-types';
-import Header from '../../common/header/Header';
-import Card from "@material-ui/core/Card";
-import CardActionArea from "@material-ui/core/CardActionArea";
-import CardMedia from "@material-ui/core/CardMedia";
-import CardContent from "@material-ui/core/CardContent";
-import Typography from "@material-ui/core/Typography";
-import CardActions from "@material-ui/core/CardActions";
-import withStyles from "@material-ui/core/es/styles/withStyles";
-import Grid from "@material-ui/core/Grid/Grid";
+import React, { Component } from 'react';
+import './Home.css';
+import Header from '../../common/Header/Header';
+import Card from '@material-ui/core/Card';
+import CardActionArea from '@material-ui/core/CardActionArea';
+import CardContent from '@material-ui/core/CardContent';
+import CardMedia from '@material-ui/core/CardMedia';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
+import Container from '@material-ui/core/Container';
+import Grid from '@material-ui/core/Grid';
 
-const styles = {
-    card: {
-        maxWidth: 285
-    },
+const styles = theme => ({
     media: {
-        height: 140,
+      height: 140
     },
-};
+});
 
 class Home extends Component {
+
     constructor(props) {
         super(props);
         this.state = {
-            restaurants: []
-        };
-    }
-
-    componentDidMount() {
-        this.findAllRestaurant();
-    };
-
-    searchChangeHandler = (e) => {
-        let restaurantName = e.target.value;
-        this.searchRestaurantByName(restaurantName);
+            restaurants: null,
+            filteredRestaurants: [],
+            loggedIn: sessionStorage.getItem("access-token") == null ? false : true
+        }
     }
 
     /**
-     * Find Restaurant By Name
+     * @description - On component  mount  fetching all restaurants and added to our state
      */
-    searchRestaurantByName(restaurantName){
-        if(restaurantName === "") {
-            this.findAllRestaurant();
-            return;
+    componentWillMount() {
+
+        // Get restaurant  list  
+        let dataUserProfile = null;
+        let xhrUserProfile = new XMLHttpRequest();
+        let that = this;
+        xhrUserProfile.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+            const data = JSON.parse(this.responseText).restaurants;
+            that.setState({
+                restaurants : data,
+                filteredRestaurants: data,
+            }); 
         }
-
-        let resourcePath = "/restaurant/name/" + restaurantName;
-        let xhr = new XMLHttpRequest();
-        let that = this;
-
-        console.log("baseurl : " + this.props.baseUrl + resourcePath);
-        xhr.addEventListener("readystatechange", function () {
-            if (this.readyState === 4 && this.status === 200) {
-                that.setState({
-                    restaurants: JSON.parse(this.responseText)
-                });
-            } else {
-                that.setState({errorResponse: this.responseText, restaurants: []});
-                console.log(this.responseText);
-            }
         });
-
-        xhr.open("GET", this.props.baseUrl + resourcePath);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.setRequestHeader("Cache-Control", "no-cache");
-        xhr.send();
-
+        xhrUserProfile.open("GET",  this.props.baseUrl +  "restaurant");
+        xhrUserProfile.setRequestHeader("Cache-Control", "no-cache");
+        xhrUserProfile.send(dataUserProfile);
     }
 
-    findAllRestaurant() {
-        let resourcePath = "/restaurant";
-        let xhr = new XMLHttpRequest();
-        let that = this;
-        xhr.addEventListener("readystatechange", function () {
-            if (this.readyState === 4 && this.status === 200) {
-                that.setState({
-                    restaurants: JSON.parse(this.responseText)
-                });
-            } else {
-                that.setState({errorResponse: this.responseText});
-              
-            }
-        });
+    /**
+     * @description - On click of restaurant its redirecting to details page
+     */
+    restaurantClickHandler = (restaurant_id, e) => {        
+        this.props.history.push("/restaurant/"+restaurant_id);       
+    };
 
-        xhr.open("GET", this.props.baseUrl + resourcePath);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.setRequestHeader("Cache-Control", "no-cache");
-        xhr.send();
+    /**
+     * @description - Based on the search text in header filtering put restaurants
+     * @param - Search field from header through props
+     */
+    applyFilter = (e) => {
+        // Getting search filed value and converting to lowercase to match with array
+        const _searchText = (e.target.value).toLowerCase();
+        // Stringify and parsing json of restaurant list to avoid reference
+        let _restaurants = JSON.parse(JSON.stringify(this.state.restaurants));
+        let _filteredRestaurants = [];
+        if(_restaurants !== null && _restaurants.length > 0){
+            // Filtering restaurants based on name and search text and assign to temp variable
+            _filteredRestaurants = _restaurants.filter((restaurant) => 
+                 (restaurant.restaurant_name.toLowerCase()).indexOf(_searchText) > -1 
+            );
 
+            // Setting filtered  restaurants to our state filteredrestaurant 
+            this.setState({
+                filteredRestaurants: [..._filteredRestaurants]
+            });
+        }
     }
 
-    cardClickHandler = (restaurantID) => {
-        this.props.history.push({
-            pathname: "/restaurant/" + restaurantID
-        });
-    }
 
     render() {
-        const classes = this.props.classes;
+        const { classes } = this.props;
         return (
             <div>
-                <div>
-                    <Header {...this.props} onChange={this.searchChangeHandler} isHomePage={true}/>
-                </div>
-                <Grid
-                    container
-                    direction="row"
-                    justify="flex-start"
-                    alignItems="center"
-                    spacing={16}
-                    className="grid-container">
-                    {this.state.restaurants.map((restaurant) =>
-                        (
-                            <Grid item lg={3} sm={6} key={restaurant.id}>
-
-                                <Card className={classes.card}
-                                      onClick={() => this.cardClickHandler(restaurant.id)}
-                                >
-                                    <CardActionArea>
-                                        <CardMedia
-                                            component="img"
-                                            alt={restaurant.restaurantName}
-                                            className={classes.media}
-                                            image={restaurant.photoUrl}
-                                            title={restaurant.restaurantName}
-                                        />
-                                        <CardContent>
-                                            <Typography gutterBottom variant="h6" component="h2">
-                                                {restaurant.restaurantName}
-                                            </Typography>
-                                        </CardContent>
-                                        <CardContent>
-                                            <Typography component="p">
-                                                {restaurant.categories}
-                                            </Typography>
-                                        </CardContent>
-                                    </CardActionArea>
-                                    <CardActions className="action-container">
-                                        <div className="user-rating">
-                                            <i className="fa fa-star" aria-hidden="true"></i>
-                                            <span> {restaurant.userRating} ({restaurant.numberUsersRated})</span>
+                <Header baseUrl={this.props.baseUrl} searchChangeHandler={this.applyFilter}/>
+                <Container fixed style={{ 'margin':16}}>
+                 {this.state.filteredRestaurants.length > 0 ? (
+                    <Grid container spacing={3}>
+                        {(this.state.filteredRestaurants ).map((restaurant, index) => (
+                            <Grid item xs={6} sm={3} key={restaurant.id} >
+                            <Card onClick={this.restaurantClickHandler.bind(this,restaurant.id)} >
+                                <CardActionArea>
+                                    <CardMedia
+                                    className={classes.media}
+                                    image={restaurant.photo_URL}
+                                    title={restaurant.restaurant_name}
+                                    />
+                                    <CardContent>
+                                    <Typography gutterBottom variant="h5" component="h2" style={{minHeight:70}}>
+                                            {restaurant.restaurant_name}
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary" component="p" style={{marginBottom:8}}>
+                                        {restaurant.categories}
+                                    </Typography>
+                                    <div className="card-footer">
+                                        <div className="card-footer-rating">
+                                             <i className="fa fa-star"></i><span style={{marginLeft:4}}>{restaurant.customer_rating} ({restaurant.number_customers_rated})</span> 
                                         </div>
-                                        <div  className="user-price">
-                                            <i className="fas fa-rupee-sign">
-                                                <span> {restaurant.avgPrice} for two</span> </i>
+                                        <div> 
+                                        <i className="fa fa-inr"></i>{restaurant.average_price} for two
                                         </div>
-
-                                    </CardActions>
-                                </Card>
-
-                            </Grid>
-
+                                    </div>
+                                    
+                                    </CardContent>
+                                </CardActionArea>                      
+                            </Card>
+                            </Grid>  
                         ))}
-
-                </Grid>
+                 </Grid> ) : (
+                      <Typography variant="h6" color="textPrimary" component="h6" style={{marginBottom:8}}>
+                          No restaurant with given name.
+                      </Typography>
+                 )  }             
+                </Container>
             </div>
         )
     }
-}
 
-Home.propTypes = {
-    classes: PropTypes.object.isRequired,
-};
+}
 
 export default withStyles(styles)(Home);
